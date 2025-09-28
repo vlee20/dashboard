@@ -5,6 +5,8 @@ import {
   getDocs,
   writeBatch,
   doc,
+  query,
+  orderBy,
 } from "firebase/firestore";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -48,25 +50,22 @@ const placeHolderData = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
 export async function fetchMonthlyExpenses() {
   try {
     const col = collection(db, "monthlyExpense_2025");
-    const snapshot = await getDocs(col);
-    const results = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      const dataId = doc.id; // e.g., "January"
-      const monthIndex = months.indexOf(dataId);
-      if (monthIndex !== -1) {
-        // Place data in the correct month position
-        placeHolderData[monthIndex] = { month: dataId, ...data };
+    const q = query(col, orderBy("monthIndex"));
+    const snapshot = await getDocs(q);
+
+    // Start with 12 slots in Jan..Dec order
+    const ordered = months.map((m) => ({ month: m }));
+
+    snapshot.docs.forEach((d) => {
+      const data = d.data();
+      const monthName = data.month || d.id;
+      const idx = months.indexOf(monthName);
+      if (idx !== -1) {
+        ordered[idx] = { month: monthName, ...data };
       }
-      //   console.log("Document data:", data);
-      return {
-        // food: data.Food || 0,
-        // charging: data.Charging || 0, // or data.finance based on your Firestore field
-        ...placeHolderData[monthIndex],
-      };
     });
-    // console.log("Fetched monthly expenses:", results);
-    return results;
-    // optional: keep original month order if your collection is unsorted
+
+    return ordered;
   } catch (err) {
     console.error("fetchMonthlyExpenses error:", err);
     return [];
@@ -79,8 +78,12 @@ export async function uploadMonthlyExpenses(
 ) {
   try {
     const batch = writeBatch(db);
-    Object.entries(monthMap).forEach(([monthName, categories]) => {
-      const monthIndex = months.indexOf(monthName); // -1 if not found
+    Object.entries(monthMap).forEach(([rawMonthName, categories]) => {
+      // Normalize case/whitespace to match our months list
+      const monthName = String(rawMonthName || "").trim();
+      const monthIndex = months.findIndex(
+        (m) => m.toLowerCase() === monthName.toLowerCase()
+      ); // -1 if not found
       const data = {
         month: monthName,
         monthIndex: monthIndex === -1 ? null : monthIndex + 1,

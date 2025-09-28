@@ -1,8 +1,9 @@
 import React, { useRef, useState } from "react"
+import { Button } from "@/components/ui/button"
 import * as XLSX from "xlsx"
 import { uploadMonthlyExpenses } from "@/lib/firebase"
 
-export default function UploadExcel() {
+export default function UploadExcel({ onUploaded }) {
   const inputRef = useRef(null)
   const [status, setStatus] = useState("")
 
@@ -42,6 +43,9 @@ export default function UploadExcel() {
       const res = await uploadMonthlyExpenses(monthMap)
       if (res.success) {
         setStatus("Upload complete")
+        if (typeof onUploaded === 'function') {
+          onUploaded()
+        }
       } else {
         setStatus("Upload failed")
         console.error(res.error)
@@ -64,12 +68,9 @@ export default function UploadExcel() {
         onChange={onFile}
         style={{ display: "none" }}
       />
-      <button
-        onClick={() => inputRef.current && inputRef.current.click()}
-        className="btn"
-      >
+      <Button size="sm" onClick={() => inputRef.current && inputRef.current.click()}>
         Upload Excel
-      </button>
+      </Button>
       <span>{status}</span>
     </div>
   )
