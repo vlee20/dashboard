@@ -8,6 +8,7 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -26,6 +27,18 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+async function ensureSignedIn() {
+  if (auth.currentUser) return auth.currentUser
+  try {
+    const result = await signInAnonymously(auth)
+    return result.user
+  } catch (err) {
+    console.error("Anonymous sign-in failed:", err)
+    throw err
+  }
+}
 
 const months = [
   "January",
@@ -49,6 +62,7 @@ const placeHolderData = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
  */
 export async function fetchMonthlyExpenses() {
   try {
+    await ensureSignedIn()
     const col = collection(db, "monthlyExpense_2025");
     const q = query(col, orderBy("monthIndex"));
     const snapshot = await getDocs(q);
@@ -77,6 +91,7 @@ export async function uploadMonthlyExpenses(
   collectionName = "monthlyExpense_2025"
 ) {
   try {
+    await ensureSignedIn()
     const batch = writeBatch(db);
     Object.entries(monthMap).forEach(([rawMonthName, categories]) => {
       // Normalize case/whitespace to match our months list
