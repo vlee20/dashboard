@@ -1,0 +1,52 @@
+flowchart TD
+  subgraph Entry
+    A[index.html] --> B[src/main.jsx]
+    B --> C[src/App.jsx]
+  end
+
+  subgraph App_UI["App UI"]
+    C --> D[src/components/UploadExcel.jsx]
+    C --> E[src/components/Components.tsx (Chart)]
+    C --> F[src/components/ui/card.jsx]
+    C --> G[src/components/ui/button.jsx]
+    C --> H[src/components/ui/select.jsx]
+    C --> I[src/components/ui/calendar.jsx]
+    C --> J[src/lib/firebase.js :: fetchMonthlyExpenses()]
+    C -.-> K[src/lib/utils.js :: cn()]
+  end
+
+  subgraph Upload_Excel["Upload & Parse Excel"]
+    D --> G
+    D --> L[xlsx]
+    D --> M[src/lib/firebase.js :: uploadMonthlyExpenses()]
+  end
+
+  subgraph Charting
+    E --> N[src/components/ui/chart.jsx :: ChartContainer, ChartTooltip, ChartLegend]
+    N --> O[recharts]
+  end
+
+  subgraph Firebase_Integration
+    J --> P[firebase/app :: initializeApp]
+    J --> Q[firebase/auth :: signInAnonymously]
+    J --> R[firebase/firestore :: getDocs/query]
+    M --> R
+    M --> S[firebase/firestore :: writeBatch/set]
+    R --> T[(Cloud Firestore: collection monthlyExpense_2025)]
+    S --> T
+  end
+
+  subgraph Utilities
+    F --> K
+    G --> K
+    H --> K
+    I --> K
+  end
+
+  subgraph Build_Toolchain["Build & Styling"]
+    U[vite.config.js :: alias '@' -> 'src']
+    V[tailwindcss]
+    W[eslint]
+  end
+
+  B --> U
