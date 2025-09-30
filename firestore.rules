@@ -18,13 +18,11 @@ service cloud.firestore {
 
     // Basic validation for your month docs
     function isValidMonthDoc(monthId) {
-      // month matches the document id, and monthIndex is an int from 1..12
+      // month must match the document id; monthIndex no longer required
       return (
         (request.method == 'create' || request.method == 'update')
           ? (
               (request.resource.data.month is string)
-              && (request.resource.data.monthIndex is int)
-              && (request.resource.data.monthIndex >= 1 && request.resource.data.monthIndex <= 12)
               && (request.resource.data.month == monthId)
             )
           : true

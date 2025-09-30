@@ -5,8 +5,6 @@ import {
   getDocs,
   writeBatch,
   doc,
-  query,
-  orderBy,
 } from "firebase/firestore";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
@@ -64,8 +62,7 @@ export async function fetchMonthlyExpenses() {
   try {
     await ensureSignedIn()
     const col = collection(db, "monthlyExpense_2025");
-    const q = query(col, orderBy("monthIndex"));
-    const snapshot = await getDocs(q);
+    const snapshot = await getDocs(col);
 
     // Start with 12 slots in Jan..Dec order
     const ordered = months.map((m) => ({ month: m }));
@@ -96,12 +93,8 @@ export async function uploadMonthlyExpenses(
     Object.entries(monthMap).forEach(([rawMonthName, categories]) => {
       // Normalize case/whitespace to match our months list
       const monthName = String(rawMonthName || "").trim();
-      const monthIndex = months.findIndex(
-        (m) => m.toLowerCase() === monthName.toLowerCase()
-      ); // -1 if not found
       const data = {
         month: monthName,
-        monthIndex: monthIndex === -1 ? null : monthIndex + 1,
         ...categories, // category keys -> numeric values
       };
       const docRef = doc(db, collectionName, monthName);
