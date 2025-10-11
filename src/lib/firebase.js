@@ -90,6 +90,12 @@ export async function uploadMonthlyExpenses(
   try {
     await ensureSignedIn()
     const batch = writeBatch(db);
+    // Override: delete all existing docs in the target collection first
+    const existingSnapshot = await getDocs(collection(db, collectionName));
+    existingSnapshot.forEach((d) => {
+      const ref = doc(db, collectionName, d.id);
+      batch.delete(ref);
+    });
     Object.entries(monthMap).forEach(([rawMonthName, categories]) => {
       // Normalize case/whitespace to match our months list
       const monthName = String(rawMonthName || "").trim();
