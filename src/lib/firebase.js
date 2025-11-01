@@ -11,16 +11,16 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Your web app's Firebase configuration via environment variables
+// For Vite, env vars must be prefixed with VITE_
 const firebaseConfig = {
-  apiKey: "AIzaSyD0SUQek71pYE8rSxGTV7n1V14GcW_66qw",
-  authDomain: "dashboard-b8464.firebaseapp.com",
-  projectId: "dashboard-b8464",
-  storageBucket: "dashboard-b8464.firebasestorage.app",
-  messagingSenderId: "28721931250",
-  appId: "1:28721931250:web:0f925b023d4efd28bd416b",
-  measurementId: "G-P4LP1KC1RX",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
