@@ -295,6 +295,22 @@ function CategoriesTable({ data, selectedMonth, selectedCategory }) {
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr className="border-t">
+            <td className="py-2 font-medium">Monthly total</td>
+            {MONTHS.map(m => {
+              const monthTotal = rows.reduce((s, r) => s + (r.byMonth[m] || 0), 0)
+              return (
+                <td key={m} className="py-2 text-right hidden md:table-cell">
+                  {monthTotal ? formatCurrency(monthTotal) : '—'}
+                </td>
+              )
+            })}
+            <td className="py-2 text-right font-semibold">
+              {formatCurrency(rows.reduce((s, r) => s + r.total, 0))}
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   )
